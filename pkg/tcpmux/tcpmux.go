@@ -48,7 +48,7 @@ func (s NetService) bridge(clientConn *net.TCPConn, initData []byte) {
 	}
 	go func() {
 		_, err := io.Copy(clientConn, serviceConn)
-		if err != nil && !errors.Is(err, syscall.EPIPE) {
+		if err != nil && !errors.Is(err, syscall.EPIPE) && !errors.Is(err, net.ErrClosed) {
 			log.Println(err)
 		}
 		err = clientConn.Close()

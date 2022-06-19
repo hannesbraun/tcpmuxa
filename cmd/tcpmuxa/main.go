@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-const version = "1.0.0"
+const version = "1.0.1"
 
 func main() {
 	fmt.Println("tcpmuxa", version)
@@ -20,9 +20,12 @@ func main() {
 	}
 	tcpmuxConfig := config.ReadConfig(configPath)
 
-	port, err := strconv.Atoi(tcpmuxConfig.Vars["port"])
+	portStr, ok := tcpmuxConfig.Vars["port"]
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		log.Println("Unable to parse port number:", err)
+		if ok {
+			log.Println("Unable to parse port number:", err)
+		}
 		tcpmux.TCPMUX(tcpmuxConfig.ServiceDirectory)
 	} else {
 		tcpmux.TCPMUXWithPort(tcpmuxConfig.ServiceDirectory, port)

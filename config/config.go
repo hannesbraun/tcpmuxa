@@ -11,7 +11,7 @@ import (
 )
 
 type Config struct {
-	vars             map[string]string
+	Vars             map[string]string
 	ServiceDirectory map[string]tcpmux.Service
 }
 
@@ -61,7 +61,7 @@ func ReadConfig(path string) Config {
 	}
 
 	return Config{
-		vars:             vars,
+		Vars:             vars,
 		ServiceDirectory: serviceDirectory,
 	}
 }

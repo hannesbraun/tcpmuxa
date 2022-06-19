@@ -15,6 +15,8 @@ You have to create a configuration file first in order to use tcpmuxa. Otherwise
 
 * One line represents one service.
 * Fields are seperated trough whitespace.
+* Configuration variables can be specified using the following syntax: `$key=value`.
+  Only the `port` can optionally be specified with this syntax right now.
 * Every service starts with its name. The name is case-insensitive.
 * A network service continues with `net`, the IP followed by the port.
 * A local service continues with `local`, the path to the executable followed by its arguments.
@@ -26,6 +28,8 @@ You have to create a configuration file first in order to use tcpmuxa. Otherwise
 Example:
 
 ```
+$port=4242
+
 # Local service: date
 date            local   /bin/date
 

@@ -211,10 +211,16 @@ func recvServiceDesc(conn *net.TCPConn) (string, []byte) {
 	return strings.ToUpper(string(serviceBytes)), data
 }
 
-// TCPMUX runs the TCPMUX service.
+// TCPMUX runs the TCPMUX service on the default port.
 // This function will not return once the socket is created.
 func TCPMUX(serviceDirectory map[string]Service) {
-	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 1})
+	TCPMUXWithPort(serviceDirectory, 1)
+}
+
+// TCPMUXWithPort runs the TCPMUX service on the specified port.
+// This function will not return once the socket is created.
+func TCPMUXWithPort(serviceDirectory map[string]Service, port int) {
+	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: port})
 	if err != nil {
 		log.Fatal(err)
 	}

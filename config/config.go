@@ -2,7 +2,7 @@ package config
 
 import (
 	"bufio"
-	"github.com/hannesbraun/tcpmuxa/pkg/tcpmux"
+	"github.com/hannesbraun/tcpmuxa/tcpmux"
 	"log"
 	"net"
 	"os"
@@ -34,6 +34,7 @@ func ReadConfig(path string) Config {
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if len(line) <= 0 {
+			// Empty line
 			continue
 		} else if line[0] == '#' {
 			// Comment

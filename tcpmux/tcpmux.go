@@ -3,7 +3,7 @@ package tcpmux
 import (
 	"bytes"
 	"errors"
-	"github.com/hannesbraun/tcpmuxa/pkg/sysutils"
+	"github.com/hannesbraun/tcpmuxa/sysutils"
 	"io"
 	"log"
 	"net"

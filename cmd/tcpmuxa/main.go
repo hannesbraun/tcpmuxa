@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/hannesbraun/tcpmuxa/pkg/config"
-	"github.com/hannesbraun/tcpmuxa/pkg/tcpmux"
+	"github.com/hannesbraun/tcpmuxa/config"
+	"github.com/hannesbraun/tcpmuxa/tcpmux"
 	"os"
 )
 

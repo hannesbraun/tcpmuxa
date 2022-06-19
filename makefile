@@ -1,4 +1,4 @@
-sources := cmd/tcpmuxa/main.go pkg/*/*.go
+sources := cmd/tcpmuxa/main.go config/*.go sysutils/*.go tcpmux/*.go
 
 all: build
 

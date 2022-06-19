@@ -12,20 +12,25 @@ import (
 	"syscall"
 )
 
+// Service represents a service that may be bridged through TCPMUX.
 type Service interface {
 	bridge(clientConn *net.TCPConn, initData []byte)
 }
 
+// NetService represents a service available through a network connection.
 type NetService struct {
 	Addr net.TCPAddr
 }
 
+// LocalService represents a service available as an executable.
 type LocalService struct {
 	Path string
 	Args []string
 }
 
+// bridge briges a network service.
 func (s NetService) bridge(clientConn *net.TCPConn, initData []byte) {
+	// Open/close connection to service
 	serviceConn, err := net.DialTCP("tcp", nil, &s.Addr)
 	if err != nil {
 		notFound(clientConn)
@@ -39,13 +44,16 @@ func (s NetService) bridge(clientConn *net.TCPConn, initData []byte) {
 		}
 	}()
 
+	// Service found
 	found(clientConn)
 
+	// Send bytes that were already read previously
 	_, err = serviceConn.Write(initData)
 	if err != nil && !errors.Is(err, syscall.EPIPE) {
 		log.Println(err)
 		return
 	}
+	// Send data from the service to the client
 	go func() {
 		_, err := io.Copy(clientConn, serviceConn)
 		if err != nil && !errors.Is(err, syscall.EPIPE) && !errors.Is(err, net.ErrClosed) {
@@ -56,6 +64,7 @@ func (s NetService) bridge(clientConn *net.TCPConn, initData []byte) {
 			log.Println(err)
 		}
 	}()
+	// Send data from the client to the service
 	_, err = io.Copy(serviceConn, clientConn)
 	if err != nil && !errors.Is(err, syscall.EPIPE) && !errors.Is(err, net.ErrClosed) {
 		log.Println(err)
@@ -63,8 +72,11 @@ func (s NetService) bridge(clientConn *net.TCPConn, initData []byte) {
 	}
 }
 
+// bridge briges a local service.
 func (s LocalService) bridge(clientConn *net.TCPConn, initData []byte) {
+	// Create command
 	cmd := exec.Command(s.Path, s.Args...)
+	// Get pipes to stdin and stdout
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		notFound(clientConn)
@@ -78,6 +90,7 @@ func (s LocalService) bridge(clientConn *net.TCPConn, initData []byte) {
 		return
 	}
 
+	// Run process
 	sysutils.PrepareCmd(cmd)
 	err = cmd.Start()
 	if err != nil {
@@ -85,6 +98,8 @@ func (s LocalService) bridge(clientConn *net.TCPConn, initData []byte) {
 		log.Println(err)
 		return
 	}
+
+	// Kill process when done
 	defer func() {
 		sysutils.Kill(cmd)
 
@@ -96,11 +111,13 @@ func (s LocalService) bridge(clientConn *net.TCPConn, initData []byte) {
 
 	found(clientConn)
 
+	// Write bytes that were already read previously
 	_, err = stdin.Write(initData)
 	if err != nil && !errors.Is(err, syscall.EPIPE) {
 		log.Println(err)
 		return
 	}
+	// Client -> Process (stdin)
 	go func() {
 		_, err := io.Copy(clientConn, stdout)
 		if err != nil && !errors.Is(err, syscall.EPIPE) {
@@ -111,6 +128,7 @@ func (s LocalService) bridge(clientConn *net.TCPConn, initData []byte) {
 			log.Println(err)
 		}
 	}()
+	// Process (stdout) -> Client
 	_, err = io.Copy(stdin, clientConn)
 	if err != nil && !errors.Is(err, syscall.EPIPE) && !errors.Is(err, net.ErrClosed) {
 		log.Println(err)
@@ -132,7 +150,9 @@ func found(conn *net.TCPConn) {
 	}
 }
 
+// handleConnection handles an incoming TCP connection.
 func handleConnection(conn *net.TCPConn, serviceDirectory map[string]Service) {
+	// Close connection before returning
 	defer func() {
 		err := conn.Close()
 		if err != nil && !errors.Is(err, net.ErrClosed) {
@@ -140,9 +160,13 @@ func handleConnection(conn *net.TCPConn, serviceDirectory map[string]Service) {
 		}
 	}()
 
+	// Determine requested service
 	serviceName, initData := recvServiceDesc(conn)
 	service, serviceFound := serviceDirectory[serviceName]
+
 	if serviceName == "HELP" {
+		// HELP service
+		// Print the available service names
 		_, err := conn.Write([]byte("HELP\r\n"))
 		if err != nil {
 			log.Println(err)
@@ -156,12 +180,17 @@ func handleConnection(conn *net.TCPConn, serviceDirectory map[string]Service) {
 			}
 		}
 	} else if serviceFound {
+		// Service found: run it
 		service.bridge(conn, initData)
 	} else {
+		// Service not found in serviceDictionary
 		notFound(conn)
 	}
 }
 
+// recvServiceDesc reads from a socket to receive the requested service description.
+// Both the requested service name and some possibly unprocessed but read bytes will be returned.
+// A service name consists of all the characters up until the first occurrence of CRLF.
 func recvServiceDesc(conn *net.TCPConn) (string, []byte) {
 	var buf []byte
 	tmp := make([]byte, 128)
@@ -182,6 +211,8 @@ func recvServiceDesc(conn *net.TCPConn) (string, []byte) {
 	return strings.ToUpper(string(serviceBytes)), data
 }
 
+// TcpMux runs the TCPMUX service.
+// This function will not return once the socket is created.
 func TcpMux(serviceDirectory map[string]Service) {
 	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 1})
 	if err != nil {

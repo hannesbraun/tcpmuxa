@@ -9,6 +9,7 @@ import (
 
 func PrepareCmd(cmd *exec.Cmd) {}
 
+// Kill kills a process
 func Kill(cmd *exec.Cmd) {
 	err := cmd.Process.Kill()
 	if err != nil {

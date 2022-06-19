@@ -15,7 +15,9 @@ type Config struct {
 	ServiceDirectory map[string]tcpmux.Service
 }
 
+// ReadConfig reads the configuration out of a given path to a configuration file
 func ReadConfig(path string) Config {
+	// Open/close the config file
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -30,6 +32,7 @@ func ReadConfig(path string) Config {
 	vars := map[string]string{}
 	serviceDirectory := map[string]tcpmux.Service{}
 
+	// Read file line by line
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())

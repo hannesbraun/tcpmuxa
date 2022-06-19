@@ -3,6 +3,7 @@
 package sysutils
 
 import (
+	"log"
 	"os/exec"
 	"syscall"
 )
@@ -17,6 +18,11 @@ func PrepareCmd(cmd *exec.Cmd) {
 func Kill(cmd *exec.Cmd) {
 	pgid, err := syscall.Getpgid(cmd.Process.Pid)
 	if err == nil {
-		syscall.Kill(-pgid, 15)
+		err = syscall.Kill(-pgid, 15)
+		if err != nil {
+			log.Println(err)
+		}
+	} else {
+		log.Println(err)
 	}
 }

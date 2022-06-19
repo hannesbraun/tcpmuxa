@@ -18,5 +18,5 @@ func main() {
 	}
 	tcpmuxConfig := config.ReadConfig(configPath)
 
-	tcpmux.TcpMux(tcpmuxConfig.ServiceDirectory)
+	tcpmux.TCPMUX(tcpmuxConfig.ServiceDirectory)
 }

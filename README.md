@@ -18,7 +18,7 @@ You have to create a configuration file first in order to use tcpmuxa. Otherwise
 * Configuration variables can be specified using the following syntax: `$key=value`.
   Only the `port` can optionally be specified with this syntax right now.
 * Every service starts with its name. The name is case-insensitive.
-* A network service continues with `net`, the IP followed by the port.
+* A network service continues with `net`, the hostname or IP followed by the port.
 * A local service continues with `local`, the path to the executable followed by its arguments.
 * Leading and trailing whitespace is ignored.
 * Whitespace can't be escaped.

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"os/exec"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -19,7 +20,8 @@ type Service interface {
 
 // NetService represents a service available through a network connection.
 type NetService struct {
-	Addr net.TCPAddr
+	Host string
+	Port int
 }
 
 // LocalService represents a service available as an executable.
@@ -31,7 +33,7 @@ type LocalService struct {
 // bridge briges a network service.
 func (s NetService) bridge(clientConn *net.TCPConn, initData []byte) {
 	// Open/close connection to service
-	serviceConn, err := net.DialTCP("tcp", nil, &s.Addr)
+	serviceConn, err := net.Dial("tcp", s.Host+":"+strconv.Itoa(s.Port))
 	if err != nil {
 		notFound(clientConn)
 		log.Println(err)

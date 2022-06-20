@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"github.com/hannesbraun/tcpmuxa/tcpmux"
 	"log"
-	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -98,19 +97,17 @@ func parseNetService(fields []string) tcpmux.Service {
 		return nil
 	}
 
-	ip := net.ParseIP(fields[0])
+	host := fields[0]
 	port, err := strconv.Atoi(fields[1])
-	if ip == nil {
-		return nil
-	} else if err != nil {
+	if err != nil {
 		log.Println(port)
 		return nil
 	}
 
-	return tcpmux.NetService{Addr: net.TCPAddr{
-		IP:   ip,
+	return tcpmux.NetService{
+		Host: host,
 		Port: port,
-	}}
+	}
 }
 
 func parseLocalService(fields []string) tcpmux.Service {

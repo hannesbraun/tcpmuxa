@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-const version = "1.0.1"
+const version = "1.1.0"
 
 func main() {
 	fmt.Println("tcpmuxa", version)
